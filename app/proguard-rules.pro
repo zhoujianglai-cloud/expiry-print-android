@@ -1,0 +1,1 @@
+-keep class com.fjxm.print.data.** { *; }
