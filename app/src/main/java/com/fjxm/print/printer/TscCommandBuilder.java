@@ -7,6 +7,7 @@ import com.fjxm.print.model.LabelConfig;
 
 import java.io.ByteArrayOutputStream;
 import java.nio.charset.StandardCharsets;
+import java.util.Arrays;
 import java.util.Locale;
 
 public final class TscCommandBuilder {
@@ -33,14 +34,24 @@ public final class TscCommandBuilder {
         int height = bitmap.getHeight();
         int[] row = new int[width];
         byte[] result = new byte[rowBytes * height];
+        // GP-M322 uses 0 for a heated (black) dot and 1 for an unprinted (white) dot.
+        // Start with a fully white label, then clear only the bits that should print black.
+        Arrays.fill(result, (byte) 0xFF);
         for (int y = 0; y < height; y++) {
             bitmap.getPixels(row, 0, width, 0, y, width, 1);
             for (int x = 0; x < width; x++) {
                 int color = row[x];
                 int luminance = (Color.red(color) * 299 + Color.green(color) * 587 + Color.blue(color) * 114) / 1000;
-                if (luminance < 160) result[y * rowBytes + x / 8] |= (byte) (0x80 >> (x % 8));
+                if (luminance < 160) {
+                    int index = y * rowBytes + x / 8;
+                    result[index] = markBlack(result[index], x % 8);
+                }
             }
         }
         return result;
+    }
+
+    static byte markBlack(byte current, int bitIndex) {
+        return (byte) (current & ~(0x80 >> bitIndex));
     }
 }
