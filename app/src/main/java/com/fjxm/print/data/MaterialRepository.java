@@ -24,12 +24,15 @@ public final class MaterialRepository {
 
     private final Context context;
     private final MaterialDao dao;
+    private final CategoryDao categoryDao;
     private final ExecutorService executor = Executors.newSingleThreadExecutor();
     private final Handler main = new Handler(Looper.getMainLooper());
 
     private MaterialRepository(Context context) {
         this.context = context.getApplicationContext();
-        this.dao = AppDatabase.get(context).materialDao();
+        AppDatabase database = AppDatabase.get(context);
+        this.dao = database.materialDao();
+        this.categoryDao = database.categoryDao();
     }
 
     public static MaterialRepository get(Context context) {
@@ -72,40 +75,93 @@ public final class MaterialRepository {
         });
     }
 
+    public void insert(MaterialEntity item, Runnable callback) {
+        executor.execute(() -> {
+            if (item.productId <= 0) item.productId = dao.nextProductId();
+            item.id = dao.insert(item);
+            if (callback != null) main.post(callback);
+        });
+    }
+
+    public void loadCategories(Consumer<List<CategoryEntity>> callback) {
+        executor.execute(() -> {
+            ensureSeeded();
+            List<CategoryEntity> result = categoryDao.getAll();
+            main.post(() -> callback.accept(result));
+        });
+    }
+
+    public void addCategory(String typeName, String cateName,
+                            Consumer<CategoryEntity> callback) {
+        executor.execute(() -> {
+            ensureSeeded();
+            CategoryEntity category = new CategoryEntity();
+            category.typeName = typeName.trim();
+            category.cateName = cateName.trim();
+            int existingType = categoryDao.typeForName(category.typeName);
+            category.type = existingType > 0 ? existingType : categoryDao.nextType();
+            category.cateId = categoryDao.nextCateId();
+            long id = categoryDao.insert(category);
+            if (id > 0) category.id = id;
+            CategoryEntity result = id > 0 ? category : null;
+            main.post(() -> callback.accept(result));
+        });
+    }
+
     private void ensureSeeded() {
-        if (dao.count() > 0) return;
-        List<MaterialEntity> migrated = readLegacyDatabase();
-        if (!migrated.isEmpty()) {
-            dao.insertAll(migrated);
-            return;
-        }
-        try (InputStream input = context.getAssets().open("materials.json")) {
-            ByteArrayOutputStream output = new ByteArrayOutputStream();
-            byte[] buffer = new byte[8192];
-            int read;
-            while ((read = input.read(buffer)) >= 0) output.write(buffer, 0, read);
-            JSONArray array = new JSONArray(output.toString(StandardCharsets.UTF_8.name()));
-            List<MaterialEntity> items = new ArrayList<>(array.length());
-            for (int i = 0; i < array.length(); i++) {
-                JSONObject source = array.getJSONObject(i);
-                MaterialEntity item = new MaterialEntity();
-                item.type = source.optInt("type");
-                item.typeName = source.optString("typeName");
-                item.cateId = source.optInt("cateId");
-                item.cateName = source.optString("cateName");
-                item.productId = source.optInt("productId");
-                item.product = source.optString("product");
-                item.storeType = source.optInt("storeType", 1);
-                item.refrigerationHours = source.optInt("refrigerationHours");
-                item.normalHours = source.optInt("normalHours");
-                item.freezingHours = source.optInt("freezingHours");
-                item.remarks = source.optString("remarks");
-                items.add(item);
+        if (dao.count() == 0) {
+            List<MaterialEntity> migrated = readLegacyDatabase();
+            if (!migrated.isEmpty()) {
+                dao.insertAll(migrated);
+            } else {
+                try (InputStream input = context.getAssets().open("materials.json")) {
+                    ByteArrayOutputStream output = new ByteArrayOutputStream();
+                    byte[] buffer = new byte[8192];
+                    int read;
+                    while ((read = input.read(buffer)) >= 0) output.write(buffer, 0, read);
+                    JSONArray array = new JSONArray(output.toString(StandardCharsets.UTF_8.name()));
+                    List<MaterialEntity> items = new ArrayList<>(array.length());
+                    for (int i = 0; i < array.length(); i++) {
+                        JSONObject source = array.getJSONObject(i);
+                        MaterialEntity item = new MaterialEntity();
+                        item.type = source.optInt("type");
+                        item.typeName = source.optString("typeName");
+                        item.cateId = source.optInt("cateId");
+                        item.cateName = source.optString("cateName");
+                        item.productId = source.optInt("productId");
+                        item.product = source.optString("product");
+                        item.storeType = source.optInt("storeType", 1);
+                        item.refrigerationHours = source.optInt("refrigerationHours");
+                        item.normalHours = source.optInt("normalHours");
+                        item.freezingHours = source.optInt("freezingHours");
+                        item.remarks = source.optString("remarks");
+                        items.add(item);
+                    }
+                    dao.insertAll(items);
+                } catch (Exception error) {
+                    throw new IllegalStateException("无法导入内置模板", error);
+                }
             }
-            dao.insertAll(items);
-        } catch (Exception error) {
-            throw new IllegalStateException("无法导入内置模板", error);
         }
+        ensureCategories();
+    }
+
+    private void ensureCategories() {
+        if (categoryDao.count() > 0) return;
+        List<CategoryEntity> categories = new ArrayList<>();
+        List<String> keys = new ArrayList<>();
+        for (MaterialEntity item : dao.getAll()) {
+            String key = item.typeName + "\u0000" + item.cateName;
+            if (item.typeName.isEmpty() || item.cateName.isEmpty() || keys.contains(key)) continue;
+            keys.add(key);
+            CategoryEntity category = new CategoryEntity();
+            category.type = item.type;
+            category.typeName = item.typeName;
+            category.cateId = item.cateId;
+            category.cateName = item.cateName;
+            categories.add(category);
+        }
+        if (!categories.isEmpty()) categoryDao.insertAll(categories);
     }
 
     /** Imports user-edited templates when this rebuild replaces the legacy APK. */

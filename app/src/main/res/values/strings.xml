@@ -47,4 +47,22 @@
     <string name="category_description">%1$s · %2$s</string>
     <string name="integer_value">%1$d</string>
     <string name="sending_print_data">正在发送…</string>
+    <string name="add_category">新增分类</string>
+    <string name="add_ingredient">新增食材</string>
+    <string name="category">所属分类</string>
+    <string name="group_name">区域/分组</string>
+    <string name="group_name_example">例如：水吧、后厨</string>
+    <string name="category_name">分类名称</string>
+    <string name="category_name_example">例如：茶叶类、小料类</string>
+    <string name="cancel">取消</string>
+    <string name="category_required">请选择所属分类</string>
+    <string name="group_required">请输入区域或分组名称</string>
+    <string name="category_name_required">请输入分类名称</string>
+    <string name="category_exists">该分类已经存在</string>
+    <string name="category_saved">分类已保存，可在新增食材时选择</string>
+    <string name="ingredient_required">请输入食材名称</string>
+    <string name="duration_required">请输入有效时长</string>
+    <string name="ingredient_saved">食材已保存到本机</string>
+    <string name="remarks_optional">备注（选填）</string>
+    <string name="saving">正在保存…</string>
 </resources>

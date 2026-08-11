@@ -65,10 +65,13 @@ public final class MaterialAdapter extends ListAdapter<MaterialEntity, MaterialA
         }
         @Override public boolean areContentsTheSame(@NonNull MaterialEntity oldItem, @NonNull MaterialEntity newItem) {
             return oldItem.product.equals(newItem.product)
+                    && oldItem.typeName.equals(newItem.typeName)
+                    && oldItem.cateName.equals(newItem.cateName)
                     && oldItem.storeType == newItem.storeType
                     && oldItem.refrigerationHours == newItem.refrigerationHours
                     && oldItem.normalHours == newItem.normalHours
-                    && oldItem.freezingHours == newItem.freezingHours;
+                    && oldItem.freezingHours == newItem.freezingHours
+                    && oldItem.remarks.equals(newItem.remarks);
         }
     };
 }

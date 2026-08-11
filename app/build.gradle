@@ -11,8 +11,8 @@ android {
         applicationId 'com.fjxm.print'
         minSdk 28
         targetSdk 36
-        versionCode 7
-        versionName '5.0'
+        versionCode 8
+        versionName '6.0'
 
         testInstrumentationRunner 'androidx.test.runner.AndroidJUnitRunner'
         vectorDrawables.useSupportLibrary = true

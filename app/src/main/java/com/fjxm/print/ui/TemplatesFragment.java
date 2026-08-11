@@ -5,17 +5,22 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.appcompat.app.AlertDialog;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 
 import com.fjxm.print.R;
 import com.fjxm.print.data.MaterialEntity;
 import com.fjxm.print.data.MaterialRepository;
+import com.fjxm.print.databinding.DialogAddCategoryBinding;
 import com.fjxm.print.databinding.FragmentTemplatesBinding;
 import com.google.android.material.chip.Chip;
+import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 
 import java.util.ArrayList;
 import java.util.LinkedHashSet;
@@ -33,8 +38,14 @@ public class TemplatesFragment extends Fragment {
         adapter = new MaterialAdapter(this::openItem);
         binding.materialList.setLayoutManager(new LinearLayoutManager(requireContext()));
         binding.materialList.setAdapter(adapter);
-        load();
+        binding.addCategoryButton.setOnClickListener(view -> showAddCategoryDialog());
+        binding.addMaterialButton.setOnClickListener(view -> openNewItem());
         return binding.getRoot();
+    }
+
+    @Override public void onResume() {
+        super.onResume();
+        if (binding != null) load();
     }
 
     private void load() {
@@ -86,6 +97,51 @@ public class TemplatesFragment extends Fragment {
         Intent intent = new Intent(requireContext(), MaterialEditActivity.class);
         intent.putExtra(MaterialEditActivity.EXTRA_MATERIAL_ID, item.id);
         startActivity(intent);
+    }
+
+    private void openNewItem() {
+        startActivity(new Intent(requireContext(), MaterialEditActivity.class));
+    }
+
+    private void showAddCategoryDialog() {
+        DialogAddCategoryBinding dialogBinding = DialogAddCategoryBinding.inflate(getLayoutInflater());
+        AlertDialog dialog = new MaterialAlertDialogBuilder(requireContext())
+                .setTitle(R.string.add_category)
+                .setView(dialogBinding.getRoot())
+                .setNegativeButton(R.string.cancel, null)
+                .setPositiveButton(R.string.save, null)
+                .create();
+        dialog.setOnShowListener(ignored -> {
+            Button save = dialog.getButton(AlertDialog.BUTTON_POSITIVE);
+            save.setOnClickListener(view -> {
+                String typeName = text(dialogBinding.typeNameInput.getText());
+                String categoryName = text(dialogBinding.categoryNameInput.getText());
+                dialogBinding.typeNameLayout.setError(typeName.isEmpty()
+                        ? getString(R.string.group_required) : null);
+                dialogBinding.categoryNameLayout.setError(categoryName.isEmpty()
+                        ? getString(R.string.category_name_required) : null);
+                if (typeName.isEmpty() || categoryName.isEmpty()) return;
+                save.setEnabled(false);
+                save.setText(R.string.saving);
+                MaterialRepository.get(requireContext()).addCategory(typeName, categoryName, category -> {
+                    if (binding == null || !isAdded()) return;
+                    if (category == null) {
+                        save.setEnabled(true);
+                        save.setText(R.string.save);
+                        dialogBinding.categoryNameLayout.setError(getString(R.string.category_exists));
+                        return;
+                    }
+                    dialog.dismiss();
+                    Toast.makeText(requireContext(), R.string.category_saved, Toast.LENGTH_SHORT).show();
+                    load();
+                });
+            });
+        });
+        dialog.show();
+    }
+
+    private String text(CharSequence value) {
+        return value == null ? "" : value.toString().trim();
     }
 
     @Override public void onDestroyView() {

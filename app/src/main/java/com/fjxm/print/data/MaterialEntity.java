@@ -33,4 +33,11 @@ public class MaterialEntity {
         else if (storageType == 3) normalHours = hours;
         else refrigerationHours = hours;
     }
+
+    public void applyCategory(CategoryEntity category) {
+        type = category.type;
+        typeName = category.typeName;
+        cateId = category.cateId;
+        cateName = category.cateName;
+    }
 }
