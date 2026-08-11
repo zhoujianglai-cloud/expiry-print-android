@@ -17,9 +17,9 @@ public final class TscCommandBuilder {
         int rowBytes = (bitmap.getWidth() + 7) / 8;
         byte[] pixels = toMonochrome(bitmap, rowBytes);
         String header = String.format(Locale.US,
-                "SIZE %.1f mm,%.1f mm\r\nGAP %.1f mm,0 mm\r\nDIRECTION 1\r\nDENSITY %d\r\nSPEED %d\r\nCLS\r\nBITMAP 0,0,%d,%d,0,",
+                "SIZE %.1f mm,%.1f mm\r\nGAP %.1f mm,0 mm\r\n%sDENSITY %d\r\nSPEED %d\r\nCLS\r\nBITMAP 0,0,%d,%d,0,",
                 config.widthMm, config.heightMm, config.gapMm,
-                config.density, config.speed, rowBytes, bitmap.getHeight());
+                directionCommand(), config.density, config.speed, rowBytes, bitmap.getHeight());
         ByteArrayOutputStream output = new ByteArrayOutputStream(header.length() + pixels.length + 32);
         byte[] headerBytes = header.getBytes(StandardCharsets.US_ASCII);
         byte[] footerBytes = "\r\nPRINT 1,1\r\n".getBytes(StandardCharsets.US_ASCII);
@@ -49,6 +49,10 @@ public final class TscCommandBuilder {
             }
         }
         return result;
+    }
+
+    static String directionCommand() {
+        return "DIRECTION 0\r\n";
     }
 
     static byte markBlack(byte current, int bitIndex) {
