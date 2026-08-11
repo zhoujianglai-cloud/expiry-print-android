@@ -4,7 +4,6 @@ import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
-import android.graphics.RectF;
 import android.graphics.Typeface;
 
 import com.fjxm.print.data.MaterialEntity;
@@ -31,77 +30,86 @@ public final class LabelRenderer {
         float top = marginY;
         float right = width - marginX;
         float bottom = height - marginY;
-        float titleBottom = top + (bottom - top) * 0.21f;
-        float storageBottom = top + (bottom - top) * 0.43f;
+        float titleBottom = top + (bottom - top) * 0.22f;
+        float storageBottom = top + (bottom - top) * 0.40f;
 
         Paint line = new Paint(Paint.ANTI_ALIAS_FLAG);
         line.setColor(Color.BLACK);
         line.setStyle(Paint.Style.STROKE);
-        line.setStrokeWidth(Math.max(2f, width / 180f));
-        canvas.drawRect(new RectF(left, top, right, bottom), line);
-        canvas.drawLine(left, titleBottom, right, titleBottom, line);
-        canvas.drawLine(left, storageBottom, right, storageBottom, line);
+        line.setStrokeWidth(Math.max(1.6f, width / 210f));
+        float horizontalInset = Math.max(6f, width * 0.02f);
+        canvas.drawLine(left + horizontalInset, titleBottom,
+                right - horizontalInset, titleBottom, line);
+        canvas.drawLine(left + horizontalInset, storageBottom,
+                right - horizontalInset, storageBottom, line);
 
         String product = item == null ? "测试标签" : item.product;
         drawCenteredFit(canvas, product, (left + right) / 2f, (top + titleBottom) / 2f,
-                right - left - 20f, Math.max(22f, width * 0.075f), true);
+                right - left - 28f, Math.max(24f, width * 0.072f), true);
 
         float colWidth = (right - left) / 3f;
         String[] storageNames = {"冷藏", "冷冻", "常温"};
         for (int i = 0; i < 3; i++) {
             float cellLeft = left + colWidth * i;
             float centerX = cellLeft + colWidth / 2f;
-            float box = Math.min(24f, colWidth * 0.18f);
-            float groupWidth = box + 6f + Math.min(colWidth * 0.52f, 48f);
-            float boxLeft = centerX - groupWidth / 2f;
+            float radius = Math.min(10f, colWidth * 0.08f);
             float centerY = (titleBottom + storageBottom) / 2f;
-            canvas.drawRect(boxLeft, centerY - box / 2f, boxLeft + box, centerY + box / 2f, line);
-            if (storageType == i + 1) drawCheck(canvas, boxLeft, centerY - box / 2f, box, line);
-            drawTextCenteredY(canvas, storageNames[i], boxLeft + box + 6f, centerY,
-                    Math.max(17f, width * 0.052f), false);
+            Paint storagePaint = textPaint(Math.max(19f, width * 0.057f), true);
+            float textWidth = storagePaint.measureText(storageNames[i]);
+            float gap = Math.max(7f, width * 0.018f);
+            float groupWidth = radius * 2f + gap + textWidth;
+            float circleX = centerX - groupWidth / 2f + radius;
+            drawRadio(canvas, circleX, centerY, radius, storageType == i + 1, line);
+            drawTextCenteredY(canvas, storageNames[i], circleX + radius + gap, centerY,
+                    storagePaint.getTextSize(), true);
         }
 
         canvas.drawLine(left + colWidth, storageBottom, left + colWidth, bottom, line);
         canvas.drawLine(left + colWidth * 2f, storageBottom, left + colWidth * 2f, bottom, line);
 
         long endMillis = startMillis + Math.max(0, durationHours) * 60L * 60L * 1000L;
-        drawDateCell(canvas, left, storageBottom, colWidth, bottom - storageBottom,
-                "制作时间", startMillis, null);
-        drawDateCell(canvas, left + colWidth, storageBottom, colWidth, bottom - storageBottom,
-                "有效时间", endMillis, null);
-        drawDateCell(canvas, left + colWidth * 2f, storageBottom, colWidth, bottom - storageBottom,
-                "操作人", 0L, config.operator);
+        drawDateCell(canvas, left, storageBottom, colWidth, bottom - storageBottom, startMillis);
+        drawDateCell(canvas, left + colWidth, storageBottom,
+                colWidth, bottom - storageBottom, endMillis);
+        if (config.operator != null && !config.operator.trim().isEmpty()) {
+            drawCenteredFit(canvas, config.operator.trim(), left + colWidth * 2.5f,
+                    storageBottom + (bottom - storageBottom) * 0.63f,
+                    colWidth - 18f, Math.max(20f, colWidth * 0.20f), true);
+        }
         return bitmap;
     }
 
     private static void drawDateCell(Canvas canvas, float left, float top, float width, float height,
-                                     String label, long time, String customText) {
+                                     long time) {
         float centerX = left + width / 2f;
-        drawCenteredFit(canvas, label, centerX, top + height * 0.18f, width - 10f,
-                Math.max(14f, width * 0.14f), false);
-        if (customText != null) {
-            drawCenteredFit(canvas, customText.isEmpty() ? "—" : customText,
-                    centerX, top + height * 0.58f, width - 12f,
-                    Math.max(18f, width * 0.19f), false);
-            return;
-        }
-        Date date = new Date(time);
-        String day = new SimpleDateFormat("yyyy-MM-dd", Locale.CHINA).format(date);
-        String clock = new SimpleDateFormat("HH:mm", Locale.CHINA).format(date);
-        drawCenteredFit(canvas, day, centerX, top + height * 0.52f, width - 10f,
-                Math.max(17f, width * 0.18f), false);
-        drawCenteredFit(canvas, clock, centerX, top + height * 0.78f, width - 10f,
-                Math.max(19f, width * 0.21f), false);
+        String[] lines = formatDateLines(time);
+        float size = Math.max(20f, width * 0.20f);
+        drawCenteredFit(canvas, lines[0], centerX, top + height * 0.45f,
+                width - 16f, size, true);
+        drawCenteredFit(canvas, lines[1], centerX, top + height * 0.63f,
+                width - 16f, size, true);
+        drawCenteredFit(canvas, lines[2], centerX, top + height * 0.81f,
+                width - 16f, size, true);
     }
 
-    private static void drawCheck(Canvas canvas, float x, float y, float size, Paint paint) {
-        Paint check = new Paint(paint);
-        check.setStrokeWidth(Math.max(3f, size * 0.15f));
-        check.setStrokeCap(Paint.Cap.ROUND);
-        canvas.drawLine(x + size * 0.18f, y + size * 0.52f,
-                x + size * 0.42f, y + size * 0.76f, check);
-        canvas.drawLine(x + size * 0.42f, y + size * 0.76f,
-                x + size * 0.84f, y + size * 0.24f, check);
+    static String[] formatDateLines(long time) {
+        Date date = new Date(time);
+        return new String[] {
+                new SimpleDateFormat("yyyy年", Locale.CHINA).format(date),
+                new SimpleDateFormat("MM月dd日", Locale.CHINA).format(date),
+                new SimpleDateFormat("HH:mm", Locale.CHINA).format(date)
+        };
+    }
+
+    private static void drawRadio(Canvas canvas, float centerX, float centerY, float radius,
+                                  boolean selected, Paint paint) {
+        Paint radio = new Paint(paint);
+        radio.setStrokeWidth(Math.max(2f, radius * 0.22f));
+        canvas.drawCircle(centerX, centerY, radius, radio);
+        if (selected) {
+            radio.setStyle(Paint.Style.FILL);
+            canvas.drawCircle(centerX, centerY, radius * 0.46f, radio);
+        }
     }
 
     private static void drawCenteredFit(Canvas canvas, String text, float centerX, float centerY,
