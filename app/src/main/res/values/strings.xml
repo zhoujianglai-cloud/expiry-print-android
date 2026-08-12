@@ -1,7 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">有效期打印</string>
-    <string name="templates">模板</string>
+    <string name="ingredients">食材</string>
+    <string name="no_matching_ingredients">没有找到匹配的食材</string>
     <string name="search">搜索</string>
     <string name="printer">打印机</string>
     <string name="settings">设置</string>
@@ -23,7 +24,6 @@
     <string name="duration_hours">有效时长（小时）</string>
     <string name="gp_status">GP-M322 蓝牙状态</string>
     <string name="search_prompt">输入关键词查找食材</string>
-    <string name="no_matching_templates">没有匹配的模板</string>
     <string name="label_parameters">标签参数</string>
     <string name="label_default_description">GP-M322 默认：203 DPI、50 × 40 mm。参数保存在本机。</string>
     <string name="width_mm">宽度 mm</string>
@@ -42,9 +42,41 @@
     <string name="duration_hours_short">%1$d小时</string>
     <string name="on_site_decision">现场判断</string>
     <string name="material_accessibility">%1$s，%2$s</string>
+    <string name="custom_material_accessibility">%1$s，%2$s，自定义食材，长按或左滑可删除</string>
     <string name="time_summary">制作：%1$s\n有效：%2$s</string>
-    <string name="remarks_prefix">提示：%1$s</string>
     <string name="category_description">%1$s · %2$s</string>
     <string name="integer_value">%1$d</string>
     <string name="sending_print_data">正在发送…</string>
+    <string name="add_category">新增分类</string>
+    <string name="add_ingredient">新增食材</string>
+    <string name="add_ingredient_or_category">新增食材或分类</string>
+    <string name="choose_add_type">请选择新增内容</string>
+    <string name="category">所属分类</string>
+    <string name="group_name">区域/分组</string>
+    <string name="group_name_example">例如：水吧、后厨</string>
+    <string name="category_name">分类名称</string>
+    <string name="category_name_example">例如：茶叶类、小料类</string>
+    <string name="cancel">取消</string>
+    <string name="category_required">请选择所属分类</string>
+    <string name="group_required">请输入区域或分组名称</string>
+    <string name="category_name_required">请输入分类名称</string>
+    <string name="category_exists">该分类已经存在</string>
+    <string name="category_saved">分类已保存，可在新增食材时选择</string>
+    <string name="ingredient_required">请输入食材名称</string>
+    <string name="duration_required">请输入有效时长</string>
+    <string name="ingredient_saved">食材已保存到本机</string>
+    <string name="remarks_optional">备注（选填）</string>
+    <string name="saving">正在保存…</string>
+    <string name="delete">删除</string>
+    <string name="custom_category_accessibility">%1$s，自定义分类，长按可删除</string>
+    <string name="delete_category_title">删除分类</string>
+    <string name="delete_category_message">确定删除分类“%1$s”吗？</string>
+    <string name="category_deleted">分类已删除</string>
+    <string name="category_in_use">该分类下还有食材，请先删除这些食材</string>
+    <string name="built_in_category_protected">系统内置分类不能删除</string>
+    <string name="category_not_found">分类已不存在</string>
+    <string name="delete_ingredient_title">删除食材</string>
+    <string name="delete_ingredient_message">确定删除食材“%1$s”吗？</string>
+    <string name="ingredient_deleted">食材已删除</string>
+    <string name="built_in_ingredient_protected">系统内置食材不能删除</string>
 </resources>

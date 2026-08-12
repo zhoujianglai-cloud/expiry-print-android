@@ -20,6 +20,7 @@ public class MaterialEntity {
     public int normalHours;
     public int freezingHours;
     @NonNull public String remarks = "";
+    public boolean userCreated;
 
     public int durationFor(int storageType) {
         if (storageType == 2) return freezingHours;
@@ -32,5 +33,12 @@ public class MaterialEntity {
         if (storageType == 2) freezingHours = hours;
         else if (storageType == 3) normalHours = hours;
         else refrigerationHours = hours;
+    }
+
+    public void applyCategory(CategoryEntity category) {
+        type = category.type;
+        typeName = category.typeName;
+        cateId = category.cateId;
+        cateName = category.cateName;
     }
 }

@@ -26,20 +26,26 @@ public class MainActivity extends AppCompatActivity {
 
         binding.bottomNavigation.setOnItemSelectedListener(item -> {
             if (item.getItemId() == R.id.nav_search) {
-                show(new SearchFragment(), getString(R.string.search));
+                show(new SearchFragment(), getString(R.string.search), true);
             } else if (item.getItemId() == R.id.nav_printer) {
-                show(new PrinterFragment(), getString(R.string.printer));
+                show(new PrinterFragment(), getString(R.string.printer), true);
             } else if (item.getItemId() == R.id.nav_settings) {
-                show(new SettingsFragment(), getString(R.string.settings));
+                show(new SettingsFragment(), getString(R.string.settings), true);
             } else {
-                show(new TemplatesFragment(), getString(R.string.templates));
+                show(new TemplatesFragment(), getString(R.string.ingredients), false);
             }
             return true;
         });
-        if (savedInstanceState == null) binding.bottomNavigation.setSelectedItemId(R.id.nav_templates);
+        if (savedInstanceState == null) {
+            binding.bottomNavigation.setSelectedItemId(R.id.nav_ingredients);
+        } else {
+            boolean showToolbar = binding.bottomNavigation.getSelectedItemId() != R.id.nav_ingredients;
+            binding.toolbar.setVisibility(showToolbar ? View.VISIBLE : View.GONE);
+        }
     }
 
-    private void show(Fragment fragment, String title) {
+    private void show(Fragment fragment, String title, boolean showToolbar) {
+        binding.toolbar.setVisibility(showToolbar ? View.VISIBLE : View.GONE);
         binding.toolbar.setTitle(title);
         getSupportFragmentManager().beginTransaction()
                 .replace(R.id.fragmentContainer, fragment)

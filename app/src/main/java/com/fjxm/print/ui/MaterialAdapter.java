@@ -14,12 +14,19 @@ import com.fjxm.print.R;
 
 public final class MaterialAdapter extends ListAdapter<MaterialEntity, MaterialAdapter.Holder> {
     public interface OnItemClickListener { void onClick(MaterialEntity item); }
+    public interface OnItemLongClickListener { void onLongClick(MaterialEntity item); }
 
     private final OnItemClickListener listener;
+    private final OnItemLongClickListener longClickListener;
 
     public MaterialAdapter(OnItemClickListener listener) {
+        this(listener, null);
+    }
+
+    public MaterialAdapter(OnItemClickListener listener, OnItemLongClickListener longClickListener) {
         super(DIFF);
         this.listener = listener;
+        this.longClickListener = longClickListener;
     }
 
     @NonNull @Override
@@ -29,7 +36,11 @@ public final class MaterialAdapter extends ListAdapter<MaterialEntity, MaterialA
 
     @Override
     public void onBindViewHolder(@NonNull Holder holder, int position) {
-        holder.bind(getItem(position), listener);
+        holder.bind(getItem(position), listener, longClickListener);
+    }
+
+    public MaterialEntity itemAt(int position) {
+        return position >= 0 && position < getItemCount() ? getItem(position) : null;
     }
 
     static final class Holder extends RecyclerView.ViewHolder {
@@ -38,7 +49,8 @@ public final class MaterialAdapter extends ListAdapter<MaterialEntity, MaterialA
             super(binding.getRoot());
             this.binding = binding;
         }
-        void bind(MaterialEntity item, OnItemClickListener listener) {
+        void bind(MaterialEntity item, OnItemClickListener listener,
+                  OnItemLongClickListener longClickListener) {
             binding.productName.setText(item.product);
             binding.categoryName.setText(binding.getRoot().getContext().getString(
                     R.string.category_description, item.typeName, item.cateName));
@@ -46,9 +58,16 @@ public final class MaterialAdapter extends ListAdapter<MaterialEntity, MaterialA
             String durationText = hours > 0 ? formatHours(binding, hours)
                     : binding.getRoot().getContext().getString(R.string.on_site_decision);
             binding.duration.setText(durationText);
+            int description = item.userCreated
+                    ? R.string.custom_material_accessibility : R.string.material_accessibility;
             binding.getRoot().setContentDescription(binding.getRoot().getContext().getString(
-                    R.string.material_accessibility, item.product, durationText));
+                    description, item.product, durationText));
             binding.getRoot().setOnClickListener(view -> listener.onClick(item));
+            binding.getRoot().setOnLongClickListener(view -> {
+                if (!item.userCreated || longClickListener == null) return false;
+                longClickListener.onLongClick(item);
+                return true;
+            });
         }
     }
 
@@ -65,10 +84,14 @@ public final class MaterialAdapter extends ListAdapter<MaterialEntity, MaterialA
         }
         @Override public boolean areContentsTheSame(@NonNull MaterialEntity oldItem, @NonNull MaterialEntity newItem) {
             return oldItem.product.equals(newItem.product)
+                    && oldItem.typeName.equals(newItem.typeName)
+                    && oldItem.cateName.equals(newItem.cateName)
                     && oldItem.storeType == newItem.storeType
                     && oldItem.refrigerationHours == newItem.refrigerationHours
                     && oldItem.normalHours == newItem.normalHours
-                    && oldItem.freezingHours == newItem.freezingHours;
+                    && oldItem.freezingHours == newItem.freezingHours
+                    && oldItem.remarks.equals(newItem.remarks)
+                    && oldItem.userCreated == newItem.userCreated;
         }
     };
 }
