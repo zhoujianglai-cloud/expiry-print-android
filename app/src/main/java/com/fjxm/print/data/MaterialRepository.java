@@ -20,6 +20,7 @@ import java.util.concurrent.Executors;
 import java.util.function.Consumer;
 
 public final class MaterialRepository {
+    public enum DeleteCategoryResult { DELETED, PROTECTED, IN_USE, NOT_FOUND }
     private static volatile MaterialRepository instance;
 
     private final Context context;
@@ -77,6 +78,7 @@ public final class MaterialRepository {
 
     public void insert(MaterialEntity item, Runnable callback) {
         executor.execute(() -> {
+            item.userCreated = true;
             if (item.productId <= 0) item.productId = dao.nextProductId();
             item.id = dao.insert(item);
             if (callback != null) main.post(callback);
@@ -98,6 +100,7 @@ public final class MaterialRepository {
             CategoryEntity category = new CategoryEntity();
             category.typeName = typeName.trim();
             category.cateName = cateName.trim();
+            category.userCreated = true;
             int existingType = categoryDao.typeForName(category.typeName);
             category.type = existingType > 0 ? existingType : categoryDao.nextType();
             category.cateId = categoryDao.nextCateId();
@@ -105,6 +108,37 @@ public final class MaterialRepository {
             if (id > 0) category.id = id;
             CategoryEntity result = id > 0 ? category : null;
             main.post(() -> callback.accept(result));
+        });
+    }
+
+    public void deleteMaterial(long id, Consumer<Boolean> callback) {
+        executor.execute(() -> {
+            boolean deleted = dao.deleteUserCreated(id) > 0;
+            main.post(() -> callback.accept(deleted));
+        });
+    }
+
+    public void deleteCategory(String typeName, Consumer<DeleteCategoryResult> callback) {
+        executor.execute(() -> {
+            List<CategoryEntity> matches = categoryDao.getByTypeName(typeName);
+            DeleteCategoryResult result;
+            if (matches.isEmpty()) {
+                result = DeleteCategoryResult.NOT_FOUND;
+            } else {
+                boolean allUserCreated = true;
+                for (CategoryEntity category : matches) {
+                    if (!category.userCreated) {
+                        allUserCreated = false;
+                        break;
+                    }
+                }
+                if (!allUserCreated) result = DeleteCategoryResult.PROTECTED;
+                else if (dao.countForTypeName(typeName) > 0) result = DeleteCategoryResult.IN_USE;
+                else result = categoryDao.deleteUserCreatedByTypeName(typeName) > 0
+                        ? DeleteCategoryResult.DELETED : DeleteCategoryResult.NOT_FOUND;
+            }
+            DeleteCategoryResult delivered = result;
+            main.post(() -> callback.accept(delivered));
         });
     }
 
@@ -159,6 +193,7 @@ public final class MaterialRepository {
             category.typeName = item.typeName;
             category.cateId = item.cateId;
             category.cateName = item.cateName;
+            category.userCreated = item.userCreated || item.cateId > 39;
             categories.add(category);
         }
         if (!categories.isEmpty()) categoryDao.insertAll(categories);
@@ -186,6 +221,7 @@ public final class MaterialRepository {
                 item.normalHours = integer(cursor, "normalTemperatureTime");
                 item.freezingHours = integer(cursor, "freezingTime");
                 item.remarks = string(cursor, "remarsk");
+                item.userCreated = item.productId > 160;
                 if (!item.product.isEmpty()) items.add(item);
             }
         } catch (Exception ignored) {

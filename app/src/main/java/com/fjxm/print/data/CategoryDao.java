@@ -12,6 +12,9 @@ public interface CategoryDao {
     @Query("SELECT * FROM categories ORDER BY type, cateId, id")
     List<CategoryEntity> getAll();
 
+    @Query("SELECT * FROM categories WHERE typeName = :typeName ORDER BY id")
+    List<CategoryEntity> getByTypeName(String typeName);
+
     @Query("SELECT COUNT(*) FROM categories")
     int count();
 
@@ -29,4 +32,7 @@ public interface CategoryDao {
 
     @Insert(onConflict = OnConflictStrategy.IGNORE)
     void insertAll(List<CategoryEntity> categories);
+
+    @Query("DELETE FROM categories WHERE typeName = :typeName AND userCreated = 1")
+    int deleteUserCreatedByTypeName(String typeName);
 }

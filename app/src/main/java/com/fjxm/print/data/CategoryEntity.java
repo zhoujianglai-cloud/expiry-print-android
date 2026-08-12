@@ -14,6 +14,7 @@ public class CategoryEntity {
     @NonNull public String typeName = "";
     public int cateId;
     @NonNull public String cateName = "";
+    public boolean userCreated;
 
     public String displayName() {
         return typeName + " · " + cateName;

@@ -20,6 +20,7 @@ public class MaterialEntity {
     public int normalHours;
     public int freezingHours;
     @NonNull public String remarks = "";
+    public boolean userCreated;
 
     public int durationFor(int storageType) {
         if (storageType == 2) return freezingHours;

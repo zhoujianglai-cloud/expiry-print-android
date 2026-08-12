@@ -21,6 +21,9 @@ public interface MaterialDao {
     @Query("SELECT COUNT(*) FROM materials")
     int count();
 
+    @Query("SELECT COUNT(*) FROM materials WHERE typeName = :typeName")
+    int countForTypeName(String typeName);
+
     @Query("SELECT COALESCE(MAX(productId), 0) + 1 FROM materials")
     int nextProductId();
 
@@ -32,4 +35,7 @@ public interface MaterialDao {
 
     @Update
     void update(MaterialEntity item);
+
+    @Query("DELETE FROM materials WHERE id = :id AND userCreated = 1")
+    int deleteUserCreated(long id);
 }

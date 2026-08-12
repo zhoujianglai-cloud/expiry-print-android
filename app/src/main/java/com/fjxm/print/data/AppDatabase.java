@@ -8,7 +8,7 @@ import androidx.room.RoomDatabase;
 import androidx.room.migration.Migration;
 import androidx.sqlite.db.SupportSQLiteDatabase;
 
-@Database(entities = {MaterialEntity.class, CategoryEntity.class}, version = 2, exportSchema = false)
+@Database(entities = {MaterialEntity.class, CategoryEntity.class}, version = 3, exportSchema = false)
 public abstract class AppDatabase extends RoomDatabase {
     private static volatile AppDatabase instance;
 
@@ -26,6 +26,15 @@ public abstract class AppDatabase extends RoomDatabase {
         }
     };
 
+    private static final Migration MIGRATION_2_3 = new Migration(2, 3) {
+        @Override public void migrate(SupportSQLiteDatabase database) {
+            database.execSQL("ALTER TABLE `materials` ADD COLUMN `userCreated` INTEGER NOT NULL DEFAULT 0");
+            database.execSQL("ALTER TABLE `categories` ADD COLUMN `userCreated` INTEGER NOT NULL DEFAULT 0");
+            database.execSQL("UPDATE `materials` SET `userCreated` = 1 WHERE `productId` > 160");
+            database.execSQL("UPDATE `categories` SET `userCreated` = 1 WHERE `cateId` > 39");
+        }
+    };
+
     public abstract MaterialDao materialDao();
     public abstract CategoryDao categoryDao();
 
@@ -37,7 +46,7 @@ public abstract class AppDatabase extends RoomDatabase {
                             context.getApplicationContext(),
                             AppDatabase.class,
                             "expiry_print.db"
-                    ).addMigrations(MIGRATION_1_2).build();
+                    ).addMigrations(MIGRATION_1_2, MIGRATION_2_3).build();
                 }
             }
         }

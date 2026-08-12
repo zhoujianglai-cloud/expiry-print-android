@@ -24,5 +24,6 @@ public class CategoryEntityTest {
         assertEquals("后厨", material.typeName);
         assertEquals(23, material.cateId);
         assertEquals("酱料类", material.cateName);
+        assertEquals(false, material.userCreated);
     }
 }

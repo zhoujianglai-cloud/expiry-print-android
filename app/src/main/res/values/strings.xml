@@ -42,8 +42,8 @@
     <string name="duration_hours_short">%1$d小时</string>
     <string name="on_site_decision">现场判断</string>
     <string name="material_accessibility">%1$s，%2$s</string>
+    <string name="custom_material_accessibility">%1$s，%2$s，自定义食材，长按或左滑可删除</string>
     <string name="time_summary">制作：%1$s\n有效：%2$s</string>
-    <string name="remarks_prefix">提示：%1$s</string>
     <string name="category_description">%1$s · %2$s</string>
     <string name="integer_value">%1$d</string>
     <string name="sending_print_data">正在发送…</string>
@@ -65,4 +65,16 @@
     <string name="ingredient_saved">食材已保存到本机</string>
     <string name="remarks_optional">备注（选填）</string>
     <string name="saving">正在保存…</string>
+    <string name="delete">删除</string>
+    <string name="custom_category_accessibility">%1$s，自定义分类，长按可删除</string>
+    <string name="delete_category_title">删除分类</string>
+    <string name="delete_category_message">确定删除分类“%1$s”吗？</string>
+    <string name="category_deleted">分类已删除</string>
+    <string name="category_in_use">该分类下还有食材，请先删除这些食材</string>
+    <string name="built_in_category_protected">系统内置分类不能删除</string>
+    <string name="category_not_found">分类已不存在</string>
+    <string name="delete_ingredient_title">删除食材</string>
+    <string name="delete_ingredient_message">确定删除食材“%1$s”吗？</string>
+    <string name="ingredient_deleted">食材已删除</string>
+    <string name="built_in_ingredient_protected">系统内置食材不能删除</string>
 </resources>
