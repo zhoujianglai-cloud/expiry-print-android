@@ -10,4 +10,5 @@
     <color name="outline">#C7A49B</color>
     <color name="text_primary">#FFF7F5</color>
     <color name="text_secondary">#E5C7C0</color>
+    <color name="card_stroke">#4A3732</color>
 </resources>

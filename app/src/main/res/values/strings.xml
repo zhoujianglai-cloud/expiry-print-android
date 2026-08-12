@@ -49,6 +49,8 @@
     <string name="sending_print_data">正在发送…</string>
     <string name="add_category">新增分类</string>
     <string name="add_ingredient">新增食材</string>
+    <string name="add_ingredient_or_category">新增食材或分类</string>
+    <string name="choose_add_type">请选择新增内容</string>
     <string name="category">所属分类</string>
     <string name="group_name">区域/分组</string>
     <string name="group_name_example">例如：水吧、后厨</string>
