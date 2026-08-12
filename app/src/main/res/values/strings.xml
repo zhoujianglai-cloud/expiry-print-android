@@ -1,7 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">有效期打印</string>
-    <string name="templates">模板</string>
+    <string name="ingredients">食材</string>
+    <string name="no_matching_ingredients">没有找到匹配的食材</string>
     <string name="search">搜索</string>
     <string name="printer">打印机</string>
     <string name="settings">设置</string>
@@ -23,7 +24,6 @@
     <string name="duration_hours">有效时长（小时）</string>
     <string name="gp_status">GP-M322 蓝牙状态</string>
     <string name="search_prompt">输入关键词查找食材</string>
-    <string name="no_matching_templates">没有匹配的模板</string>
     <string name="label_parameters">标签参数</string>
     <string name="label_default_description">GP-M322 默认：203 DPI、50 × 40 mm。参数保存在本机。</string>
     <string name="width_mm">宽度 mm</string>

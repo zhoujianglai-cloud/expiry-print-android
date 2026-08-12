@@ -64,7 +64,7 @@ public class TemplatesFragment extends Fragment {
         addChip(getString(R.string.all), null, true);
         LinkedHashSet<String> names = new LinkedHashSet<>();
         for (MaterialEntity item : items) names.add(item.typeName);
-        for (String name : names) addChip(name, name, false);
+        for (String name : names) addChip(CategoryLabelFormatter.format(name), name, false);
     }
 
     private void addChip(String text, String filter, boolean checked) {
@@ -72,12 +72,9 @@ public class TemplatesFragment extends Fragment {
         chip.setText(text);
         chip.setCheckable(true);
         chip.setChecked(checked);
+        chip.setEnsureMinTouchTargetSize(true);
         chip.setMinHeight(getResources().getDimensionPixelSize(R.dimen.touch_target));
         chip.setOnClickListener(view -> {
-            for (int i = 0; i < binding.typeChips.getChildCount(); i++) {
-                View child = binding.typeChips.getChildAt(i);
-                if (child instanceof Chip && child != chip) ((Chip) child).setChecked(false);
-            }
             chip.setChecked(true);
             filter(filter);
         });
